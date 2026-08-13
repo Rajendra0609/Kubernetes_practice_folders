@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: deadlock-demo-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: internal-app
+    image: busybox
+    command: ["/bin/sh", "-c"]
+    args:
+    - >
+      echo "[$(date +%T)] App starting successfully on port 8080...";
+      # Start a background listener to mimic a working web server
+      echo -e "HTTP/1.1 200 OK\n\nOK" | nc -ll -p 8080 &
+      
+      echo "[$(date +%T)] App is healthy. Waiting 15 seconds before locking up...";
+      sleep 15;
+      
+      echo "[$(date +%T)] !!! CRITICAL ERROR: Entering infinite deadlock loop now !!!";
+      while true; do 
+        : ; 
+      done
+
+#kubectl exec deadlock-demo-pod -- wget -T 3 -O- http://localhost:8080

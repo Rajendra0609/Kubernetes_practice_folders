@@ -1,0 +1,63 @@
+apiversion: v1
+kind: Pod
+metadata:
+  name: shipping-pod-log
+  labels:
+    app: log-shipper-demo
+  spec:
+    restartPolicy: Always
+    volumes: 
+    - name: shared-app-logs
+      emptyDir: {}
+
+    containers:
+    - name: main-web-app
+      image: busybox
+      command: ["/bin/sh", "-c"]
+      args: 
+      - >
+        while true; do
+          echo "[$(date +'%Y-%m-%d %H:%M:%S')] HTTP 200 OK - GET /index.html - ClientIP 10.244.1.45" >> /var/log/app/access.log;
+          sleep 1;
+        done
+    resources:
+       requests:
+         cpu: "100m"
+         memory: "64Mi"
+       limits:
+          cpu: "200m"
+          memory: "128Mi"
+    volumeMounts:
+    - name: shared-app-logs
+      mountPath: /var/log/app
+    - name: log-shipping-sidecar
+    image: busybox:1.36
+    command: ["/bin/sh", "-c"]
+    args:
+    - >
+      echo "[SIDECAR] Starting log shipping agent...";
+      touch /var/log/app/access.log; # Ensure file exists before tailing
+      
+      # Continuous tailing loop with built-in network fault isolation
+      tail -f /var/log/app/access.log | while read -r log_line; do
+        echo "[SIDECAR AGENT] Attempting to ship line to central log cluster..."
+        
+        # Simulating a connection attempt to an unreachable destination with a 2-second timeout
+        if ! nc -w 2 -z 192.0.2.1 514 2>/dev/null; then
+          # ERROR HANDLING: Log the failure to standard out, but do NOT execute 'exit 1'
+          echo "[SIDECAR ERROR] Destination 192.0.2.1:514 unreachable. Safely caching log locally: $log_line"
+        else
+          echo "$log_line" | nc 192.0.2.1 514
+        fi
+      done
+      resources:
+      requests:
+        cpu: "50m"
+        memory: "32Mi"
+      limits:
+        cpu: "100m"
+        memory: "64Mi"
+      volumeMounts:
+      - name: shared-app-logs
+        mountPath: /var/log/app 
+        

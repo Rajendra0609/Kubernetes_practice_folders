@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: crash-always-pod
+spec:
+   restartPolicy: OnFailure
+   containers:
+   - name: crashing-app
+     image: busybox
+     command: ["/bin/sh", "-c"]
+     args: ["echo '[$(date +%T)] Starting...'; sleep 3; echo '[$(date +%T)] Crashing!'; exit 1"]
+     

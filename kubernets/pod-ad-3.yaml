@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: target-app
+  labels:
+    app: web-server
+spec:
+  restartPolicy: Always
+  containers:
+  - name: nginx
+    image: nginx:alpine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-buggy-app
+spec:
+  restartPolicy: Never
+  containers:
+  - name: dynamic-tester
+    image: busybox:1.36
+    command: ["/bin/sh", "-c"]
+    args:
+    - >
+      echo "[$(date +%T)] Client started. Waiting for instructions...";
+      sleep 3600;
+
+#kubectl get pod target-app -o jsonpath='{.status.podIP}'
+#kubectl exec client-buggy-app -- wget -O- http://10.244.1.50
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: web-service
+# spec:
+#   selector:
+#     app: web-server # Matches the label on the target-app Pod
+#   ports:
+#     - protocol: TCP
+#       port: 80
+#       targetPort: 80

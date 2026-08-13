@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: short-pod
+spec:
+   restartPolicy: Never
+   containers:
+   - name: short-task
+     image: busybox
+     command: ["/bin/sh", "-c"]
+     args: 
+     - >
+       echo "task started....";
+       for i in $(seq 10 -1 1); do
+         echo "Exiting in $i seconds ....";
+         sleep 1;
+       done;
+       echo "task Completed!"
+       

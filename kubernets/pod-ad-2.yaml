@@ -1,0 +1,13 @@
+apiversion: v1
+kind: Pod
+metadata:
+   name: struck-termination-pod
+   finalizers:
+   - ://example.com
+spec: 
+   restartPolicy: Never
+   containers:
+   - name: app-container
+     image: busybox
+     command: ["sleep", "3600"]
+     

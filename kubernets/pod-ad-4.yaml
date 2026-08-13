@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-starved-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: memory-allocator
+    image: busybox:1.36
+    command: ["/bin/sh", "-c"]
+    args:
+    - >
+      echo "[$(date +%T)] Starting application loop...";
+      sleep 2;
+      
+      echo "[$(date +%T)] Allocating 10MB into memory buffer...";
+      buf1=$(dd if=/dev/zero bs=1M count=10 2>/dev/null);
+      sleep 2;
+      
+      echo "[$(date +%T)] Allocating an additional 40MB (Total 50MB)...";
+      buf2=$(dd if=/dev/zero bs=1M count=40 2>/dev/null);
+      
+      echo "[$(date +%T)] Task complete smoothly.";
+    resources:
+      requests:
+        memory: "10Mi"
+        cpu: "50m"
+      limits:
+        memory: "20Mi" # Hard limit set too low for a 50MB workload
+        cpu: "100m"
