@@ -33,3 +33,26 @@ kubectl get nodes
    34  kubectl label pod frontend-prod owner-
    35  kubectl get pods --show-labels
    36  kubectl delete namespace label-lab
+kubectl create deployment webapp --image=nginx
+   42  kubectl create ns label
+   43  kubectl config set-context --current --namespace=label
+   44  kubectl create deployment webapp --image=nginx
+   45  kubectl get deployments 
+   46  kubectl get pods
+   47  kubectl get all
+   48  clear
+   49  kubectl annotate deployment webapp owner-contact="rajendra.daggubati@gmail.com"
+   50  kubectl annotate deployment webapp description="nginx web application for testing"
+   51  kubectl describe webapp
+   52  kubectl describe deployment webapp
+   53  kubectl label deployemnt webapp owner=Rajendra
+   54  kubectl label deployment webapp owner=Rajendra
+   55  kubectl describe deployment webapp
+   56  kubectl get deployment webapp --show-labels
+   57  kubectl get pods --show-labels
+   58  clear
+   59  kubectl expose deployment webapp --port=80 --type=NodePort
+   60  kubectl get svc webapp
+   61  kubectl get service webapp -o jsonpath='{.spec.selector}'
+   62  kubectl get endpointslices
+   63  kubectl annotate deployment webapp owner-contact="team@gmail.com" --overwrite
