@@ -56,3 +56,10 @@ kubectl create deployment webapp --image=nginx
    61  kubectl get service webapp -o jsonpath='{.spec.selector}'
    62  kubectl get endpointslices
    63  kubectl annotate deployment webapp owner-contact="team@gmail.com" --overwrite
+kubectl config set-context --current --namespace=label-lab
+2
+kubectl config view --minify -o jsonpath='{..namespace}'; echo
+3
+kubectl get pods
+4
+kubectl get pods -n label-lab
