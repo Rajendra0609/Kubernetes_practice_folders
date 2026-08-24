@@ -79,3 +79,23 @@ kubectl create ns lab
    83  history
 kubectl get limitrange -n lab
    89  kubectl describe limitrange -n lab
+kubectl config set-context --current --namespace=label-lab
+
+kubectl run web-pod --image=nginx --labels="app=web"
+kubectl wait --for=condition=Ready pod/web-pod --timeout=120s
+
+kubectl expose pod web-pod --name=web-service --port=80 --target-port=80
+
+kubectl get pod web-pod --show-labels
+kubectl get service web-service -o jsonpath='{.spec.selector}'; echo
+kubectl get endpoints web-service
+
+kubectl label pod web-pod app=other --overwrite
+sleep 5
+kubectl get pod web-pod --show-labels
+kubectl get endpoints web-service
+
+kubectl label pod web-pod app=web --overwrite
+sleep 5
+kubectl get pod web-pod --show-labels
+kubectl get endpoints web-service
