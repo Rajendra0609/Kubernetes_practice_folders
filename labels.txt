@@ -63,3 +63,17 @@ kubectl config view --minify -o jsonpath='{..namespace}'; echo
 kubectl get pods
 4
 kubectl get pods -n label-lab
+kubectl create ns lab
+   71  kubectl create quota pod-count-quota --hard=count/pods=1 -n lab
+   72  kubectl get resourcequots -n quota-lab
+   73  kubectl get resourcequota -n lab
+   74  kubectl run quota-pod-1 --image=nginx:1.26 -n lab
+   75  kubectl run quota-pod-2 --image=nginx:1.26 -n lab
+   76  kubectl describe resourcequota pod-count -n lab
+   77  sudo vim quota.yaml
+   78  kubectl apply -f quota.yaml 
+   79  kubectl describe resourcequota pod-count -n lab
+   80  kubectl get resourcequota
+   81  kubectl get resourcequota -n lab
+   82  kubectl describe resourcequota -n lab
+   83  history
