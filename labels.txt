@@ -77,3 +77,5 @@ kubectl create ns lab
    81  kubectl get resourcequota -n lab
    82  kubectl describe resourcequota -n lab
    83  history
+kubectl get limitrange -n lab
+   89  kubectl describe limitrange -n lab
