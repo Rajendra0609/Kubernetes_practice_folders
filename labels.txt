@@ -1,0 +1,35 @@
+kubectl get nodes
+    3  kubectl create namespace label-lab
+    4  kubectl config set-context --current --namespace=label-lab 
+    5  kubectl get ns
+    6  clear
+    7  kubectl run frontend-dev --image=nginx:1.26 --label="env-dev,tier=frontend,version=v1"
+    8  kubectl run frontend-dev --image=nginx:1.26 --labels="env-dev,tier=frontend,version=v1"
+    9  kubectl run frontend-dev --image=nginx:1.26 --labels="env=dev,tier=frontend,version=v1"
+   10  kubectl run backend-dev --image=nginx:1.26 --labels="env=dev,tier=backend,version=v1"
+   11  kubectl run frontend-prod --image=nginx:1.26 --labels="env=dev,tier=frontend,version=v1"
+   12  kubectl run backend-prod --image=nginx:1.26 --labels="env=dev,tier=backend,version=v1"
+   13  kubectl run backend-prod --image=nginx:1.26 --labels="env=prod,tier=backend,version=v1"
+   14  kubectl delete pod backend-prod 
+   15  kubectl run backend-prod --image=nginx:1.26 --labels="env=prod,tier=backend,version=v1"
+   16  kubectl delete pod frontend-prod 
+   17  kubectl run frontend-prod --image=nginx:1.26 --labels="env=prod,tier=frontend,version=v1"
+   18  kubectl get pods
+   19  kubectl get pods --show-labels
+   20  kubectl get pods -l env=dev
+   21  kubectl get pods -l env=prod
+   22  kubectl get pods -l tier=frontend
+   23  kubectl get pods -l version=v2
+   24  kubectl get pods -l tier=frontend,env=dev
+   25  kubectl get pods -l tier=frontend,env=prod
+   26  kubectl get pods -l env in (dev,prod)'
+   27  kubectl get pods -l 'env in (dev,prod)'
+   28  clear
+   29  kubectl label pod frontend-dev owner=rajendra
+   30  kubectl get pods -l
+   31  kubectl get pods --show-labels
+   32  kubectl label pod frontend-prod version=v2 --overwrite
+   33  kubectl get pods --show-labels
+   34  kubectl label pod frontend-prod owner-
+   35  kubectl get pods --show-labels
+   36  kubectl delete namespace label-lab
