@@ -1,0 +1,96 @@
+kubectl auth can-i create namespace
+   82  kubectl auth can-i create namespaces
+   83  kubectl auth can-i create resourcequotas --all-namespaces
+   84  kubectl auth can-i create rolebindings --all-namespaces
+   85  for team in team1 team2 team3 team4 team5 team6 team7 team8; do   for env in dev test prod;   do     kubectl create namespace ${team}-${env};   done; done
+   86  clear
+   87  kubectl get namespaces
+   88  for team in team1 team2 team3 team4 team5 team6 team7 team8; do   for env in dev test prod;   do     kubectl label namespace ${team}-${env} team=${team} environment=${env};   done; done
+   89  kubectl get namespaces --show-labels
+   90  kubectl top nodes
+   91  kubectl describe nodes
+   92  for team in team1 team2 team3 team4 team5 team6 team7 team8; do
+kubectl apply -n ${team}-dev -f - <<EOF
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: namespace-quota
+spec:
+  hard:
+    requests.cpu: "1"
+    limits.cpu: "2"
+    requests.memory: 2Gi
+    limits.memory: 4Gi
+    pods: "20"
+    services: "10"
+    persistentvolumeclaims: "5"
+EOF
+ done
+   93  for team in team1 team2 team3 team4 team5 team6 team7 team8; do
+kubectl apply -n ${team}-test -f - <<EOF
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: namespace-quota
+spec:
+  hard:
+    requests.cpu: "2"
+    limits.cpu: "4"
+    requests.memory: 4Gi
+    limits.memory: 8Gi
+    pods: "30"
+    services: "15"
+    persistentvolumeclaims: "10"
+EOF
+ done
+   94  for team in team1 team2 team3 team4 team5 team6 team7 team8; do
+kubectl apply -n ${team}-prod -f - <<EOF
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: namespace-quota
+spec:
+  hard:
+    requests.cpu: "4"
+    limits.cpu: "8"
+    requests.memory: 8Gi
+    limits.memory: 16Gi
+    pods: "50"
+    services: "20"
+    persistentvolumeclaims: "15"
+EOF
+ done
+   95  kubectl get resourcequota -A
+   96  for team in team1 team2 team3 team4 team5 team6 team7 team8; do   for env in dev test prod;   do
+kubectl apply -n ${team}-${env} -f - <<EOF
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: container-defaults
+spec:
+  limits:
+  - type: Container
+    defaultRequest:
+      cpu: 100m
+      memory: 128Mi
+    default:
+      cpu: 500m
+      memory: 512Mi
+EOF
+   done; done
+   97  kubectl get pods
+   98  kubectl get limitrange -A
+   99  `
+  100  kubectl get limitrange -A
+  101  for team in team1 team2 team3 team4 team5 team6 team7 team8; do   for env in dev test prod;   do     kubectl create rolebinding ${team}-edit       --clusterrole=edit       --group=${team}       --namespace=${team}-${env};   done; done
+  102  kubectl get rolebindings -A
+  103  kubectl describe rolebinding team1-edit -n team1-dev
+  104  kubectl auth can-i create deployments   -n team1-dev   --as=test-user   --as-group=team1
+  105  kubectl auth can-i create deployments   -n team2-dev   --as=test-user   --as-group=team1
+  106  kubectl create deployment nginx   --image=nginx   --replicas=1   -n team1-dev
+  107  kubectl get pods -n team1-dev
+  108  kubectl get deployments -n team1-dev
+  109  kubectl get pods -n team1-dev
+  110  kubectl get deployments -n team1-dev
+  111  kubectl describe resourcequota namespace-quota -n team1-dev
+  112  kubectl delete deployment nginx -n team1-dev
