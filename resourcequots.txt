@@ -94,3 +94,291 @@ EOF
   110  kubectl get deployments -n team1-dev
   111  kubectl describe resourcequota namespace-quota -n team1-dev
   112  kubectl delete deployment nginx -n team1-dev
+kubectl version
+  119  kubectl auth can-i create validatingadmissionpolicies
+  120  kubectl auth can-i create validatingadmissionpolicybindings
+  121  kubectl get namespaces --show-labels
+  122  kubectl label namespace team1-dev team=team1
+  123  Show more lines
+  124  kubectl label namespace team1-dev team=team1
+  125  cat > required-labels-policy.yaml <<'EOF'
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-organization-labels
+spec:
+  failurePolicy: Fail
+
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+          - "apps"
+          - "batch"
+          - "networking.k8s.io"
+        apiVersions:
+          - "*"
+        operations:
+         *- CREATE
+          - UPDATE
+      * resources:
+          - pods
+     *    - services
+          - configm*ps
+          - secrets
+          -*persistentvolumeclaims
+          -*deployments
+          - statefulse*s
+          - daemonsets
+         *- replicasets
+          - jobs
+   *      - cronjobs
+          - ingre*ses
+
+  validations:
+    - expressi*n: >
+        has(object.metadata.l*bels) &&
+        'owner' in object*metadata.labels &&
+        object.*etadata.labels['owner'].trim() != *'
+      message: "Required label '*wner' is missing or empty."
+
+    -*expression: >
+        has(object.m*tadata.labels) &&
+        'cost-ce*ter' in object.metadata.labels &&
+*       object.metadata.labels['cost-center'].trim() != ''
+      messa*e: "Required label 'cost-center' i* missing or empty."
+
+    - express*on: >
+        has(object.metadata.*abels) &&
+        'env' in object.*etadata.labels &&
+        object.m*tadata.labels['env'] in ['dev', 'test', 'prod']
+      message: "Requi*ed label 'env' must be dev, test, *r prod."
+
+---
+apiVersion: admissio*registration.k8s.io/v1
+kind: Valid*tingAdmissionPolicyBinding
+metadat*:
+  name: require-organization-lab*ls-binding
+spec:
+  policyName: req*ire-organization-labels
+
+  validat*onActions:
+    - Warn
+    - Audit
+*  matchResources:
+    namespaceSel*ctor:
+      matchExpressions:
+    *   - key: team
+          operator:*Exists
+EOF
+
+  126  clear
+  127  ;s
+  128  ls
+  129  kubectl apply -f required-labe*s-policy.yaml
+  130  cat > required-labels-policy.yaml <<'EOF'
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-organization-labels
+spec:
+  failurePolicy: Fail
+
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+          - "apps"
+          - "batch"
+          - "networking.k8s.io"
+        apiVersions:
+          - "*"
+        operations:
+         *- CREATE
+          - UPDATE
+      * resources:
+          - pods
+     *    - services
+          - configm*ps
+          - secrets
+          -*persistentvolumeclaims
+          -*deployments
+          - statefulse*s
+          - daemonsets
+         *- replicasets
+          - jobs
+   *      - cronjobs
+          - ingre*ses
+
+  validations:
+    - expressi*n: >
+        has(object.metadata.l*bels) &&
+        'owner' in object*metadata.labels &&
+        object.*etadata.labels['owner'].trim() != *'
+      message: "Required label '*wner' is missing or empty."
+
+    -*expression: >
+        has(object.m*tadata.labels) &&
+        'cost-ce*ter' in object.metadata.labels &&
+*       object.metadata.labels['cost-center'].trim() != ''
+      messa*e: "Required label 'cost-center' i* missing or empty."
+
+    - express*on: >
+        has(object.metadata.*abels) &&
+        'env' in object.*etadata.labels &&
+        object.m*tadata.labels['env'] in ['dev', 'test', 'prod']
+      message: "Requi*ed label 'env' must be dev, test, *r prod."
+
+---
+apiVersion: admissio*registration.k8s.io/v1
+kind: Valid*tingAdmissionPolicyBinding
+metadat*:
+  name: require-organization-lab*ls-binding
+spec:
+  policyName: req*ire-organization-labels
+
+  validat*onActions:
+    - Warn
+    - Audit
+*  matchResources:
+    namespaceSel*ctor:
+      matchExpressions:
+    *   - key: team
+          operator:*Exists
+EOF
+
+  131  kubectl apply -f required-labe*s-policy.yaml
+  132  clear
+  133  cat > required-labels-policy.yaml <<'EOF'
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-organization-labels
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+          - "apps"
+          - "batch"
+          - "networking.k8s.io"
+        apiVersions:
+          - "*"
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+          - services
+          - configmaps
+          - secrets
+          - persistentvolumeclaims
+          - deployments
+          - statefulsets
+          - daemonsets
+          - replicasets
+          - jobs
+          - cronjobs
+          - ingresses
+  validations:
+    - expression: >-
+        has(object.metadata.labels) &&
+        'owner' in object.metadata.labels &&
+        object.metadata.labels['owner'].trim() != ''
+      message: "Required label 'owner' is missing or empty."
+
+    - expression: >-
+        has(object.metadata.labels) &&
+        'cost-center' in object.metadata.labels &&
+        object.metadata.labels['cost-center'].trim() != ''
+      message: "Required label 'cost-center' is missing or empty."
+
+    - expression: >-
+        has(object.metadata.labels) &&
+        'env' in object.metadata.labels &&
+        object.metadata.labels['env'] in ['dev', '
+
+  134  cat > required-labels-policy.yaml <<'EOF'
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-organization-labels
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+          - "apps"
+          - "batch"
+          - "networking.k8s.io"
+        apiVersions:
+          - "*"
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+          - services
+          - configmaps
+          - secrets
+          - persistentvolumeclaims
+          - deployments
+          - statefulsets
+          - daemonsets
+          - replicasets
+          - jobs
+          - cronjobs
+          - ingresses
+  validations:
+    - expression: >-
+        has(object.metadata.labels) &&
+        'owner' in object.metadata.labels &&
+        object.metadata.labels['owner'].trim() != ''
+      message: "Required label 'owner' is missing or empty."
+
+    - expression: >-
+        has(object.metadata.labels) &&
+        'cost-center' in object.metadata.labels &&
+        object.metadata.labels['cost-center'].trim() != ''
+      message: "Required label 'cost-center' is missing or empty."
+
+    - expression: >-
+        has(object.metadata.labels) &&
+        'env' in object.metadata.labels &&
+        object.metadata.labels['env'] in ['dev', 'test', 'prod']
+      message: "Required label 'env' must be dev, test, or prod."
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: require-organization-labels-binding
+spec:
+  policyName: require-organization-labels
+  validationActions:
+    - Warn
+    - Audit
+  matchResources:
+    namespaceSelector:
+      matchExpressions:
+        - key: team
+          operator: Exists
+EOF
+
+  135  clearclear
+  136  clear
+  137  kubectl apply --dry-run=server -f required-labels-policy.yaml
+  138  kubectl apply -f required-labe*s-policy.yaml
+  139  kubectl get validatinga*missionpolicy
+  140  kubectl get validati*gadmissionpolicybinding
+  141  kubectl get validatingadmissionpolicybinding
+  142  kubectl get validatingadmissionpolicy
+  143  kubectl run bad-nginx --image=nginx -n team1-dev
+  144  kubectl get pods -n team1-dev
+  145  clear
+  146  kubectl run good-nginx --image=nginx -n team1-dev --labels="owner=team1,cost-center=cc1001,env=dev"
+  147  kubectl get all -n team1-dev
+  148  kubectl patch validatingadmissionpolicybinding   require-organization-labels-binding   --type=merge   -p '{"spec":{"validationActions":["Deny"]}}'
+  149  kubectl run bad-nginx --image=nginx -n team1-dev
+  150  kubectl run good-nginx1 --image=nginx -n team1-dev --labels="owner=team1,cost-center=cc1001,env=dev"
