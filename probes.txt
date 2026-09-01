@@ -80,3 +80,110 @@ EOF
    18  kubectl apply -f readiness-demo.yaml
    19  kubectl get all
    20  kubectl get pod readiness-demo -w
+kubectl get nodes
+   25  cat > probe-comparison.yaml <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: no-probes
+  labels:
+    app: no-probes
+spec:
+  containers:
+    - name: web
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /www
+          echo "Hello from Pod without probes" > /www/index.html
+          httpd -f -p 8080 -h /www &
+          echo $! > /tmp/httpd.pid
+          while true; do sleep 30; done
+      ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: no-probes-service
+spec:
+  selector:
+    app: no-probes
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-probes
+  labels:
+    app: with-probes
+spec:
+  containers:
+    - name: web
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /www
+          echo "Hello from Pod with probes" > /www/index.html
+          httpd -f -p 8080 -h /www &
+          echo $! > /tmp/httpd.pid
+          while true; do sleep 30; done
+      ports:
+        - containerPort: 8080
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 8080
+        initialDelaySeconds: 3
+        periodSeconds: 2
+        failureThreshold: 1
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: with-probes-service
+spec:
+  selector:
+    app: with-probes
+  ports:
+    - port: 80
+      targetPort: 8080
+EOF
+
+   26  kubectl apply -f probe-comparison.yaml
+   27  kubectl get pods -w
+   28  kubectl exec no-probes -- wget -qO- http://localhost:8080/
+   29  kubectl exec with-probes -- wget -qO- http://localhost:8080/
+   30  kubectl get services
+   31  kubectl get endpoints no-probes-service with-probes-service
+   32  kubectl get pods
+   33  kubectl exec no-probes -- sh -c 'kill $(cat /tmp/httpd.pid)'
+   34  kubectl exec no-probes -- wget -qO- http://localhost:8080/
+   35  kubectl get pod no-probes
+   36  kubectl get endpoints no-probes-service
+   37  kubectl get pod with-probes -w
+   38  kubectl exec with-probes -- sh -c 'kill $(cat /tmp/httpd.pid)'
+   39  kubectl get pod with-probes
+   40  kubectl get endpoints with-probes-service
+   41  `
+   42  kubectl get endpoints with-probes-service
+   43  kubectl get pod with-probes
+   44  kubectl get pod with-probes -o jsonpath='{.status.containerStatuses[0].restartCount}{"\n"}'
+   45  kubectl exec with-probes -- wget -qO- http://localhost:8080/
+   46  kubectl get endpoints with-probes-service
+   47  kubectl describe pod with-probes
+   48  kubectl describe pod no-probes
+   49  kubectl delete -f probe-comparison.yaml
