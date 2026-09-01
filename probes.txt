@@ -1,0 +1,82 @@
+kubectl get nodes
+    3  cat > liveness-pod.yaml <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-demo
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Application is healthy" > /usr/share/nginx/html/health
+          exec nginx -g 'daemon off;'
+      ports:
+        - containerPort: 80
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+EOF
+
+    4  ls
+    5  kubectl apply -f liveness-pod.yaml
+    6  kubectl exec liveness-demo -- wget -qO- http://localhost/health
+    7  kubectl get pods
+    8  kubectl exec liveness-demo -- wget -qO- http://localhost/health
+    9  kubectl get pods
+   10  kubectl exec -it liveness-demo -- sh
+   11  kubectl get pods liveness-demo -w
+   12  kubectl describe pod liveness-demo 
+   13  kubectl delete pod liveness-demo
+   14  clear
+   15  kubectl get nodes
+   16  cat > readiness-demo.yaml <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readiness-demo
+  labels:
+    app: readiness-demo
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Application is ready" > /usr/share/nginx/html/ready
+          exec nginx -g 'daemon off;'
+      ports:
+        - containerPort: 80
+      readinessProbe:
+        httpGet:
+          path: /ready
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: readiness-service
+spec:
+  selector:
+    app: readiness-demo
+  ports:
+    - port: 80
+      targetPort: 80
+EOF
+
+   17  clear
+   18  kubectl apply -f readiness-demo.yaml
+   19  kubectl get all
+   20  kubectl get pod readiness-demo -w
