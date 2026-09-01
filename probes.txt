@@ -187,3 +187,202 @@ EOF
    47  kubectl describe pod with-probes
    48  kubectl describe pod no-probes
    49  kubectl delete -f probe-comparison.yaml
+cat > three-probes.yaml <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-probe-pod
+  labels:
+    probe: http
+spec:
+  containers:
+    - name: http-container
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /www
+          echo "HTTP probe is healthy" > /www/health
+          httpd -f -p 8080 -h /www &
+          echo $! > /tmp/httpd.pid
+          while true; do sleep 30; done
+      ports:
+        - containerPort: 8080
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tcp-probe-pod
+  labels:
+    probe: tcp
+spec:
+  containers:
+    - name: tcp-container
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /www
+          echo "TCP probe is healthy" > /www/index.html
+          httpd -f -p 8080 -h /www &
+          echo $! > /tmp/httpd.pid
+          while true; do sleep 30; done
+      ports:
+        - containerPort: 8080
+      livenessProbe:
+        tcpSocket:
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exec-probe-pod
+  labels:
+    probe: exec
+spec:
+  containers:
+    - name: exec-container
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          touch /tmp/healthy
+          while true; do sleep 30; done
+      livenessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/healthy
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+EOF
+
+   55  cat > three-probes.yaml <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-probe-pod
+  labels:
+    probe: http
+spec:
+  containers:
+    - name: http-container
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /www
+          echo "HTTP probe is healthy" > /www/health
+          httpd -f -p 8080 -h /www &
+          echo $! > /tmp/httpd.pid
+          while true; do sleep 30; done
+      ports:
+        - containerPort: 8080
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tcp-probe-pod
+  labels:
+    probe: tcp
+spec:
+  containers:
+    - name: tcp-container
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /www
+          echo "TCP probe is healthy" > /www/index.html
+          httpd -f -p 8080 -h /www &
+          echo $! > /tmp/httpd.pid
+          while true; do sleep 30; done
+      ports:
+        - containerPort: 8080
+      livenessProbe:
+        tcpSocket:
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exec-probe-pod
+  labels:
+    probe: exec
+spec:
+  containers:
+    - name: exec-container
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          touch /tmp/healthy
+          while true; do sleep 30; done
+      livenessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/healthy
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 2
+EOF
+
+   56  kubectl apply -f three-probes.yaml 
+   57  kubectl get pods
+   58  kubectl get pods -w
+kubectl exec liveness-demo -- rm /usr/share/nginx/html/health
+    2  kubectl exec readiness-demo -- wget -qO- http://localhost/ready
+    3  kubectl get endpointslices
+    4  kubectl get pod readiness-demo -o wide
+    5  kubectl exec readiness-demo -- rm /usr/share/nginx/html/ready
+    6  kubectl get endpointslices
+    7  kubectl get endpointslices -w
+    8  kubectl exec http-probe-pod -- wget -qO- http://localhost:8080/health
+    9  kubectl exec http-probe-pod -- rm /www/health
+   10  kubectl exec http-probe-pod -- wget -qO- http://localhost:8080/health
+   11  kubectl get pod http-probe-pod
+   12  kubectl get pod http-probe-pod -w
+   13  kubectl exec http-probe-pod -- wget -qO- http://localhost:8080/health
+   14  kubectl exec tcp-probe-pod -- wget -qO- http://localhost:8080/
+   15  ``
+   16  kubectl exec tcp-probe-pod -- sh -c 'kill $(cat /tmp/httpd.pid)'
+   17  kubectl exec tcp-probe-pod -- wget -qO- http://localhost:8080/
+   18  kubectl get pod tcp-probe-pod
+   19  kubectl get pod tcp-probe-pod -w
+   20  kubectl exec tcp-probe-pod -- wget -qO- http://localhost:8080/
+   21  kubectl exec exec-probe-pod -- ls -l /tmp/healthy
+   22  kubectl exec exec-probe-pod -- cat /tmp/healthy
+   23  kubectl exec exec-probe-pod -- rm /tmp/healthy
+   24  kubectl exec exec-probe-pod -- cat /tmp/healthy
+   25  kubectl get pod exec-probe-pod -w
+   26  kubectl describe pod http-probe-pod
+   27  kubectl describe pod tcp-probe-pod
+   28  kubectl describe pod exec-probe-pod
